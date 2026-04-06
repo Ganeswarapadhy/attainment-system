@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Development Activities</title>
+    <link id="mainStylesheet" rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        (function () {
+            const stylesheet = document.getElementById("mainStylesheet");
+            const href = stylesheet.getAttribute("href") || "";
+
+            // If opened directly, Jinja placeholders are not rendered.
+            if (href.includes("{{") || href.includes("}}")) {
+                stylesheet.setAttribute("href", "../static/style.css");
+            }
+        })();
+    </script>
+    <style>
+        /* Page-specific overrides */
+        td,
+        th {
+            font-size: 0.9em;
+        }
+
+        .evidence-box {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Development Activities</h2>
+        <table id="developmentTable">
+            <thead>
+                <tr>
+                    <th>S. No.</th>
+                    <th>Name of Faculty</th>
+                    <th>Type of Activity</th>
+                    <th>Title / Description</th>
+                    <th>Agency / Source</th>
+                    <th>Amount (₹)</th>
+                    <th>Duration</th>
+                    <th>Year</th>
+                    <th style="width: 220px;">Evidence (Upload/Link)</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody id="developmentBody">
+                <tr>
+                    <td>1</td>
+                    <td><input type="text"></td>
+                    <td><input type="text"></td>
+                    <td><input type="text"></td>
+                    <td><input type="text"></td>
+                    <td><input type="number"></td>
+                    <td><input type="text"></td>
+                    <td><input type="text"></td>
+                    <td>
+                        <div class="evidence-box">
+                            <input type="file" accept=".pdf,.jpg,.png">
+                            <input type="text" placeholder="Paste Link/DOI">
+                        </div>
+                    </td>
+                    <td><button class="delete-btn" onclick="removeDevRow(this)">X</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <button class="btn-add" onclick="addDevelopmentRow()">+ Add Row</button>
+        <br><br>
+        <p>Types of Development Activities (as per NBA)</p>
+        <ul>
+            <li>Product Development</li>
+            <li>Research Laboratories / Lab Setup</li>
+            <li>Instructional Materials (e-content, manuals, videos)</li>
+            <li>Working Models / Charts / Prototypes</li>
+            <li>Software Tools / Applications</li>
+        </ul>
+        <h3>Year-wise Funding Summary</h3>
+        <table>
+            <tr>
+                <th>Year</th>
+                <th>Total Amount (₹ In Lakhs)</th>
+                <th>Marks Awarded (Individual)</th>
+            </tr>
+            <tr>
+                <td>CAYm1</td>
+                <td><input type="number" id="amt1" oninput="calculateSummary()" placeholder="0"></td>
+                <td><input type="number" id="m1" class="auto-calc" readonly></td>
+            </tr>
+            <tr>
+                <td>CAYm2</td>
+                <td><input type="number" id="amt2" oninput="calculateSummary()" placeholder="0"></td>
+                <td><input type="number" id="m2" class="auto-calc" readonly></td>
+            </tr>
+            <tr>
+                <td>CAYm3</td>
+                <td><input type="number" id="amt3" oninput="calculateSummary()" placeholder="0"></td>
+                <td><input type="number" id="m3" class="auto-calc" readonly></td>
+            </tr>
+            <tr style="background-color: #e9ecef; font-weight: bold;">
+                <td>Cumulative Total</td>
+                <td><input type="text" id="cumTotal" class="auto-calc" readonly></td>
+                <td><input type="text" id="cumMarks" class="auto-calc marks-total" readonly></td>
+            </tr>
+        </table>
+        <p>Important Notes</p>
+        <ul>
+            <li>Focus on tangible outcomes (products, labs, tools)</li>
+            <li>Internal funding can be included if properly documented</li>
+            <li>Provide clear proof (photos, reports, sanction orders, usage evidence)</li>
+            <li>Avoid overlap with Sponsored Research</li>
+        </ul>
+        <h2>Consultancy (from Industry)</h2>
+    </div>
+    <div class="container">
+        <table id="consultancyTable">
+            <thead>
+                <tr>
+                    <th>S. No.</th>
+                    <th>Name of Faculty</th>
+                    <th>Role of Faculty</th>
+                    <th>Type of Activity</th>
+                    <th>Title / Description</th>
+                    <th>Funding Agency / Source</th>
+                    <th>Amount (₹)</th>
+                    <th>Duration</th>
+                    <th>Nature of Work</th>
+                    <th>Remarks</th>
+                    <th style="width:220px;">Evidence (Upload/Link)</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody id="consultancyBody">
+                <tr>
+                    <td>1</td>
+                    <td><input type="text"></td>
+                    <td><input type="text"></td>
+                    <td><input type="text"></td>
+                    <td><input type="text"></td>
+                    <td><input type="text"></td>
+                    <td><input type="number"></td>
+                    <td><input type="text"></td>
+                    <td><input type="text"></td>
+                    <td><input type="number"></td>
+                    <td>
+                        <div class="evidence-box">
+                            <input type="file" accept=".pdf,.jpg,.png">
+                            <input type="text" placeholder="Paste Link/DOI">
+                        </div>
+                    </td>
+                    <td><button class="delete-btn" onclick="removeRow(this)">X</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <button class="btn-add" onclick="addConsultancyRow()">+ Add Row</button>
+        <br><br>
+        <h3>Year-wise Funding Summary</h3>
+        <table>
+            <tr>
+                <th>Year</th>
+                <th>Total Amount (₹ In Lakhs)</th>
+                <th>Marks Awarded</th>
+            </tr>
+            <tr>
+                <td>CAYm1</td>
+                <td>
+                    <input type="number" id="consultancy_amt1" oninput="calculateConsultancy()" placeholder="0">
+                </td>
+                <td>
+                    <input type="text" id="consultancy_mark1" readonly>
+                </td>
+            </tr>
+            <tr>
+                <td>CAYm2</td>
+                <td>
+                    <input type="number" id="consultancy_amt2" oninput="calculateConsultancy()" placeholder="0">
+                </td>
+                <td>
+                    <input type="text" id="consultancy_mark2" readonly>
+                </td>
+            </tr>
+            <tr>
+                <td>CAYm3</td>
+                <td>
+                    <input type="number" id="consultancy_amt3" oninput="calculateConsultancy()" placeholder="0">
+                </td>
+                <td>
+                    <input type="text" id="consultancy_mark3" readonly>
+                </td>
+            </tr>
+            <tr style="background-color:#eee; font-weight:bold;">
+                <td>Cumulative Total</td>
+                <td>
+                    <input type="text" id="consultancy_total" readonly>
+                </td>
+                <td>
+                    <input type="text" id="consultancy_total_marks" readonly>
+                </td>
+            </tr>
+        </table>
+        <p>Important Notes</p>
+        <ul>
+            <li>Only industry-based consultancy is considered</li>
+            <li>Revenue must be credited to institution accounts</li>
+            <li>Include agreements, invoices, completion reports as proof</li>
+            <li>Avoid overlap with Sponsored Research</li>
+            <li>Clearly mention faculty role (Consultant/Advisor/PI)</li>
+        </ul>
+    </div>
+    <div style="text-align:right;">
+        <a href="/str-table">
+            <button>Back to STR</button>
+        </a>
+    </div>
+    <script>
+        function addDevelopmentRow() {
+            let tbody = document.getElementById("developmentBody");
+            let rowCount = tbody.rows.length + 1;
+            let row = tbody.insertRow();
+            row.innerHTML = `
+        <td>${rowCount}</td>
+        <td><input type="text"></td>
+        <td><input type="text"></td>
+        <td><input type="text"></td>
+        <td><input type="text"></td>
+        <td><input type="number"></td>
+        <td><input type="text"></td>
+        <td><input type="text"></td>
+        <td>
+            <div class="evidence-box">
+                <input type="file" accept=".pdf,.jpg,.png">
+                <input type="text" placeholder="Paste Link/DOI">
+            </div>
+        </td>
+        <td><button class="delete-btn" onclick="removeDevRow(this)">X</button></td>
+          `;
+        }
+        function removeDevRow(btn) {
+            let row = btn.closest('tr');
+            let tbody = document.getElementById('developmentBody');
+            row.remove();
+            Array.from(tbody.rows).forEach((r, i) => r.cells[0].innerText = i + 1);
+        }
+        function removeRow(btn) {
+            let row = btn.closest('tr');
+            let tbody = document.getElementById('consultancyBody');
+            row.remove();
+            Array.from(tbody.rows).forEach((r, i) => r.cells[0].innerText = i + 1);
+        }
+        // Development activities marks
+        function getDevelopmentMarks(amt) {
+            if (amt > 10) return 5;
+            if (amt >= 6) return 4;
+            if (amt >= 4) return 2;
+            if (amt >= 2) return 1;
+            return 0;
+        }
+        function calculateSummary() {
+            let a1 = parseFloat(document.getElementById('amt1').value) || 0;
+            let a2 = parseFloat(document.getElementById('amt2').value) || 0;
+            let a3 = parseFloat(document.getElementById('amt3').value) || 0;
+            // Calculate individual marks
+            let m1 = getDevelopmentMarks(a1);
+            let m2 = getDevelopmentMarks(a2);
+            let m3 = getDevelopmentMarks(a3);
+            document.getElementById('m1').value = m1;
+            document.getElementById('m2').value = m2;
+            document.getElementById('m3').value = m3;
+            // Calculate Cumulative Total
+            let totalAmt = a1 + a2 + a3;
+            let totalMarks = m1 + m2 + m3;
+            // Apply Limit: Total Marks Awarded cannot exceed 10
+            if (totalMarks > 10) totalMarks = 10;
+            document.getElementById('cumTotal').value = totalAmt.toFixed(2) + " Lakhs";
+            document.getElementById('cumMarks').value = totalMarks;
+        }
+        // Consultancy marks
+        function getConsultancyScaleMarks(total) {
+            if (total >= 10) return 5;
+            if (total >= 8) return 4;
+            if (total >= 6) return 3;
+            if (total >= 4) return 2;
+            if (total >= 2) return 1;
+            return 0;
+        }
+
+        function addConsultancyRow() {
+            let tbody = document.getElementById("consultancyBody");
+            let rowCount = tbody.rows.length + 1;
+            let row = tbody.insertRow();
+            row.innerHTML = `
+        <td>${rowCount}</td>
+        <td><input type="text"></td>
+        <td><input type="text"></td>
+        <td><input type="text"></td>
+        <td><input type="text"></td>
+        <td><input type="number"></td>
+        <td><input type="text"></td>
+        <td><input type="text"></td>
+        <td><input type="number"></td>
+        <td>
+            <div class="evidence-box">
+                <input type="file" accept=".pdf,.jpg,.png">
+                <input type="text" placeholder="Paste Link/DOI">
+            </div>
+        </td>
+        <td><button class="delete-btn" onclick="removeRow(this)">X</button></td>
+    `;
+        }
+        function calculateConsultancy() {
+            let a1 = parseFloat(document.getElementById("consultancy_amt1").value) || 0;
+            let a2 = parseFloat(document.getElementById("consultancy_amt2").value) || 0;
+            let a3 = parseFloat(document.getElementById("consultancy_amt3").value) || 0;
+
+            let m1 = getConsultancyMarks(a1);
+            let m2 = getConsultancyMarks(a2);
+            let m3 = getConsultancyMarks(a3);
+
+            document.getElementById("consultancy_mark1").value = m1;
+            document.getElementById("consultancy_mark2").value = m2;
+            document.getElementById("consultancy_mark3").value = m3;
+
+            let total = a1 + a2 + a3;
+            let totalMarks = m1 + m2 + m3;
+
+            if (totalMarks > 10) totalMarks = 10;
+
+            document.getElementById("consultancy_total").value = total.toFixed(2) + " Lakhs";
+            document.getElementById("consultancy_total_marks").value = totalMarks;
+        }
+
+        function getConsultancyMarks(amount) {
+            if (amount > 10) return 5;
+            if (amount >= 6) return 4;
+            if (amount >= 4) return 2;
+            if (amount >= 2) return 1;
+            return 0;
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Program Wise Student Count</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6f9; padding: 20px; color: #334155; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        h2 { text-align: center; color: #1e3a8a; font-size: 1.8em; margin-bottom: 30px; }
+        
+        /* Input Styling */
+        label { font-weight: 600; display: block; margin-bottom: 8px; color: #1e293b; font-size: 0.95em; }
+        input { 
+            width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #e2e8f0; 
+            border-radius: 6px; background: #fcfcfc; box-sizing: border-box; font-size: 1em;
+        }
+
+        /* Program Blocks */
+        .program-block { 
+            border: 1px solid #edf2f7; padding: 20px; border-radius: 10px; 
+            margin-bottom: 25px; background: #f8fafc; 
+        }
+        .program-block h3 { margin-top: 0; color: #1e3a8a; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; }
+        
+        .grid-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+        .pg-grid { grid-template-columns: 1fr 1fr; }
+
+        /* Buttons */
+        .btn { 
+            width: 100%; padding: 14px; border: none; border-radius: 6px; 
+            font-weight: bold; cursor: pointer; font-size: 1em; transition: 0.2s; 
+            margin-bottom: 20px;
+        }
+        .gen-btn { background: #4a6fa5; color: white; }
+        .calc-btn { background: #1e3a8a; color: white; }
+        .gen-btn:hover, .calc-btn:hover { opacity: 0.9; }
+
+        .nav-links { text-align: center; margin-top: 20px; font-size: 0.9em; }
+        .nav-links a { color: #475569; text-decoration: none; margin: 0 15px; }
+        .nav-links a:hover { text-decoration: underline; }
+
+        .result-area { margin-top: 20px; padding: 20px; background: #f0f7ff; border-left: 5px solid #1e3a8a; border-radius: 4px; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>STR & Student Distribution</h2>
+    
+    <label>Total Number of UG Programs</label>
+    <input type="number" id="numUG" value="1">
+    
+    <label>Total Number of PG Programs</label>
+    <input type="number" id="numPG" value="1">
+    
+    <label>Total Full-Time Faculty (F)</label>
+    <input type="number" id="facultyTotal" placeholder="e.g. 4">
+    
+    <button class="btn gen-btn" onclick="generateFields()">Generate Program Fields</button>
+
+    <div id="dynamicInputs"></div>
+
+    <button class="btn calc-btn" id="calcBtn" style="display:none;" onclick="calculateFinal()">Calculate Total & STR</button>
+    
+    <div id="result" class="result-area"></div>
+
+    <div class="nav-links">
+        <a href="Faculty.html">‹ Back to Faculty info</a>
+        <br><br>
+        <a href="javascript:void(0)" onclick="goToSTRTable()" style="font-weight:bold; color:#1e3a8a;">Go to STR Table ›</a>
+    </div>
+</div>
+
+<script>
+function generateFields() {
+    const numUG = parseInt(document.getElementById('numUG').value) || 0;
+    const numPG = parseInt(document.getElementById('numPG').value) || 0;
+    const container = document.getElementById('dynamicInputs');
+    container.innerHTML = "";
+
+    // Generate UG Blocks
+    for (let i = 1; i <= numUG; i++) {
+        container.innerHTML += `
+            <div class="program-block">
+                <h3>UG Program #${i}</h3>
+                <label>Program Name</label>
+                <input type="text" class="prog-name" placeholder="Enter Program Name">
+                <div class="grid-row">
+                    <div><label>2nd Year</label><input type="number" class="u1" value="0"></div>
+                    <div><label>3rd Year</label><input type="number" class="u2" value="0"></div>
+                    <div><label>4th Year</label><input type="number" class="u3" value="0"></div>
+                </div>
+            </div>`;
+    }
+
+    // Generate PG Blocks
+    for (let i = 1; i <= numPG; i++) {
+        container.innerHTML += `
+            <div class="program-block">
+                <h3>PG Program #${i}</h3>
+                <label>Program Name</label>
+                <input type="text" class="prog-name" placeholder="Enter Program Name">
+                <div class="grid-row pg-grid">
+                    <div><label>1st Year</label><input type="number" class="p1" value="0"></div>
+                    <div><label>2nd Year</label><input type="number" class="p2" value="0"></div>
+                </div>
+            </div>`;
+    }
+    
+    document.getElementById('calcBtn').style.display = "block";
+}
+
+function calculateFinal() {
+    const faculty = parseFloat(document.getElementById('facultyTotal').value);
+    if (!faculty || faculty <= 0) {
+        alert("Please enter a valid faculty count.");
+        return;
+    }
+
+    let totalS = 0;
+    let summaryHTML = "<strong>Breakdown:</strong><br>";
+    const blocks = document.querySelectorAll('.program-block');
+
+    blocks.forEach(block => {
+        const name = block.querySelector('.prog-name').value || "Unnamed Program";
+        let progTotal = 0;
+
+        if (block.querySelector('.u1')) { // UG logic
+            const sum = (parseInt(block.querySelector('.u1').value)||0) + 
+                        (parseInt(block.querySelector('.u2').value)||0) + 
+                        (parseInt(block.querySelector('.u3').value)||0);
+            progTotal = sum;
+            summaryHTML += `${name} (UG): ${sum}<br>`;
+        } else { // PG logic
+            const sum = (parseInt(block.querySelector('.p1').value)||0) + 
+                        (parseInt(block.querySelector('.p2').value)||0);
+            progTotal = sum;
+            summaryHTML += `${name} (PG): ${sum}<br>`;
+        }
+        totalS += progTotal;
+    });
+
+    const str = (totalS / faculty).toFixed(2);
+    const resDiv = document.getElementById('result');
+    resDiv.style.display = "block";
+    resDiv.innerHTML = `${summaryHTML}<hr><strong>Total Students (S): ${totalS}</strong><br><strong>STR: ${str}</strong>`;
+    
+    // Save for page 2
+    localStorage.setItem("totalStudents", totalS);
+    localStorage.setItem("faculty", faculty);
+}
+function goToSTRTable() {
+    const programs = [];
+    // Select all blocks to get the specific names and types entered by the user
+    document.querySelectorAll('.program-block').forEach(block => {
+        const name = block.querySelector('.prog-name').value.trim() || "Program";
+        // Check if it's UG (has u1 class) or PG
+        const type = block.querySelector('.u1') ? "UG" : "PG";
+        programs.push({ name, type });
+    });
+
+    // Save the list of programs so Page 2 can see them
+    localStorage.setItem("programList", JSON.stringify(programs));
+   
+    // Redirect to the table page
+    window.location.href = "Str_table.html";
+}</script>
+</body>
+</html>

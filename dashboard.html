@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>NBA Accreditation Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            display: flex;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: #1e3a8a;
+            color: white;
+            height: 100vh;
+            position: fixed;
+            padding: 20px;
+        }
+
+        .sidebar h2 {
+            font-size: 1.2em;
+            border-bottom: 1px solid #3b82f6;
+            padding-bottom: 10px;
+        }
+
+        .nav-item {
+            padding: 12px;
+            color: #cbd5e1;
+            text-decoration: none;
+            display: block;
+            transition: 0.3s;
+            border-radius: 5px;
+            margin-bottom: 5px;
+        }
+
+        .nav-item:hover {
+            background: #1e40af;
+            color: white;
+        }
+
+        .active {
+            background: #3b82f6;
+            color: white;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 300px;
+            padding: 30px;
+            width: calc(100% - 340px);
+        }
+
+        .header-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border-top: 5px solid #1e3a8a;
+        }
+
+        .stat-card h3 {
+            margin: 0;
+            font-size: 0.9em;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+
+        .stat-card .value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #1e3a8a;
+            margin-top: 10px;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-refresh {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            float: right;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <h2>NBA Analytics</h2>
+        <a href="#" class="nav-item active">Dashboard Overview</a>
+        <a href="CO-POAttainment.html" class="nav-item">CO-PO Attainment</a>
+        <a href="student performance.html" class="nav-item">Student Performance</a>
+        <a href="Faculty.html" class="nav-item">Faculty Information</a>
+        <a href="Str.html" class="nav-item">STR Calculation</a>
+        <a href="Development.html" class="nav-item">R&D & Consultancy</a>
+    </div>
+
+    <div class="main-content">
+        <button class="btn-refresh" onclick="location.reload()">Refresh Data</button>
+        <h1>Accreditation Summary</h1>
+        <hr>
+
+        <div class="header-stats">
+            <div class="stat-card">
+                <h3>Avg. STR</h3>
+                <div class="value" id="stat-str">--</div>
+            </div>
+            <div class="stat-card">
+                <h3>Faculty Retention</h3>
+                <div class="value" id="stat-retention">--</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Students (S)</h3>
+                <div class="value" id="stat-students">--</div>
+            </div>
+            <div class="stat-card">
+                <h3>Success Index</h3>
+                <div class="value" id="stat-si">--</div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h3>Faculty Qualification Distribution</h3>
+                <canvas id="facultyChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>R&D Funding (₹ Lakhs)</h3>
+                <canvas id="fundingChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load Data from LocalStorage (Linked to your other pages)
+        document.addEventListener('DOMContentLoaded', function () {
+            const totalS = localStorage.getItem("totalStudents") || 0;
+            const facultyCount = localStorage.getItem("faculty") || 0;
+            const retention = localStorage.getItem("retentionRate") || "0%";
+
+            // Update Stats
+            document.getElementById('stat-students').innerText = totalS;
+            document.getElementById('stat-str').innerText = facultyCount > 0 ? (totalS / facultyCount).toFixed(2) : "N/A";
+            document.getElementById('stat-retention').innerText = retention;
+
+            // Faculty Chart (Ph.D vs M.Tech)
+            // Note: In your Faculty.html, ensure you save counts to localStorage
+            new Chart(document.getElementById('facultyChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['Ph.D (X)', 'M.Tech (Y)'],
+                    datasets: [{
+                        data: [12, 19], // Placeholder: Replace with logic to count from facultyData
+                        backgroundColor: ['#1e3a8a', '#3b82f6']
+                    }]
+                }
+            });
+
+            // Funding Chart (Example data from Consultancy/Research pages)
+            new Chart(document.getElementById('fundingChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['CAYm2', 'CAYm1', 'CAY'],
+                    datasets: [{
+                        label: 'Research Funding',
+                        data: [5.2, 8.4, 4.1],
+                        backgroundColor: '#10b981'
+                    }]
+                },
+                options: {
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        });
+    </script>
+
+</body>
+
+</html>

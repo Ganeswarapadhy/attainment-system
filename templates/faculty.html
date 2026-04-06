@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Faculty Info</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link id="mainStylesheet" rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        (function () {
+            const stylesheet = document.getElementById("mainStylesheet");
+            const href = stylesheet.getAttribute("href") || "";
+
+            // If opened directly, Jinja placeholders are not rendered.
+            if (href.includes("{{") || href.includes("}}")) {
+                stylesheet.setAttribute("href", "../static/style.css");
+            }
+        })();
+    </script>
+    <style>
+        /* page-specific: make inputs borderless inside table cells */
+        td input {
+            border: none;
+            outline: none;
+            width: 100%;
+        }
+
+        table {
+            min-width: 1200px;
+        }
+
+        .container {
+            overflow-x: auto;
+        }
+    </style>
+
+</head>
+
+<body>
+    <h2>Faculty Information </h2>
+
+    <div class="container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name of the Faculty Member</th>
+                    <th>Degree(higest degree)</th>
+                    <th>University</th>
+                    <th>Year of attaining higher qualification</th>
+                    <th>Association with the Institution</th>
+                    <th>Designation</th>
+                    <th>Date on which Designated as Professor/ Associate Professor</th>
+                    <th>Date of Joining the Institution</th>
+                    <th>Department</th>
+                    <th>Specialization</th>
+                    <th>Research Paper Publications</th>
+                    <th>Ph.D. Guidance</th>
+                    <th>Faculty Receiving Ph.D. during the Assessment years</th>
+                    <th>Currently Associated(Y/N)Date of Leaving(In case Currently Associated is("No"))</th>
+                    <th>Name of the Association(Regular/Contract)</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+        <button onclick="addRow()">+ Add Faculty</button>
+    </div>
+    <div style="text-align:right;">
+        <a href="/student-performance"><button>← Back to student performance</button></a>
+    </div>
+    <div style="text-align:right;">
+        <a href="/str"><button>Go to STR Page →</button></a>
+    </div>
+
+    <script>
+        const fieldTypes = [
+            "text", "text", "text", "number", "text", "text", "date", "date", "text", "text", "number", "text", "text", "date", "text"
+        ];
+        // Load saved data from server on page load
+        window.onload = async function () {
+            try {
+                const res = await fetch('/api/faculty');
+                const savedData = await res.json();
+                savedData.forEach(rowData => createRow(rowData));
+            } catch (e) {
+                console.error('Failed to load faculty data:', e);
+            }
+        };
+        // Add new row
+        function addRow() {
+            createRow([]);
+            saveData();
+        }
+        // Create row
+        function createRow(data) {
+            let table = document.getElementById("tableBody");
+            let row = document.createElement("tr");
+            fieldTypes.forEach((type, index) => {
+                let cell = document.createElement("td");
+                let input = document.createElement("input");
+                input.type = type;
+                input.value = data[index] || "";
+                input.oninput = saveData;
+                cell.appendChild(input);
+                row.appendChild(cell);
+            });
+            // Delete button
+            let deleteCell = document.createElement("td");
+            let btn = document.createElement("button");
+            btn.innerText = "X";
+            btn.className = "delete-btn";
+            btn.onclick = function () { row.remove(); saveData(); };
+            deleteCell.appendChild(btn);
+            row.appendChild(deleteCell);
+            table.appendChild(row);
+        }
+        // Save all table data to server
+        async function saveData() {
+            let table = document.getElementById("tableBody");
+            let rows = table.querySelectorAll("tr");
+            let data = [];
+            rows.forEach(row => {
+                let inputs = row.querySelectorAll("input");
+                let rowData = [];
+                inputs.forEach(input => rowData.push(input.value));
+                data.push(rowData);
+            });
+            try {
+                await fetch('/api/faculty', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+            } catch (e) {
+                console.error('Failed to save faculty data:', e);
+            }
+        }
+    </script>
+</body>
+
+</html>

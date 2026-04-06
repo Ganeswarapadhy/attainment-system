@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>CO-PO Attainment System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link id="mainStylesheet" rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        (function () {
+            const stylesheet = document.getElementById("mainStylesheet");
+            const href = stylesheet.getAttribute("href") || "";
+
+            // If this file is opened directly, Jinja placeholders remain unresolved.
+            if (href.includes("{{") || href.includes("}}")) {
+                stylesheet.setAttribute("href", "../static/style.css");
+            }
+        })();
+    </script>
+    <style>
+        .subject-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #1e3a8a;
+            text-transform: uppercase;
+        }
+
+        table {
+            display: block;
+            overflow-x: auto;
+        }
+    </style>
+
+</head>
+
+<body>
+    <header>CO-PO Attainment Analysis System</header>
+    <div class="container">
+        <h3>Basic Details</h3>
+        <div class="grid">
+            <div class="input-group"><label>Subject Name</label><input type="text" id="subjectName"></div>
+            <div class="input-group"><label>No. of COs</label><input type="number" id="numCO"></div>
+            <div class="input-group"><label>No. of Students</label><input type="number" id="numStudents"></div>
+        </div>
+        <h3>GP Conditions</h3>
+        <div class="grid">
+            <div class="input-group"><label>If % ≥ High</label><input type="number" id="condHigh"></div>
+            <div class="input-group"><label>GP High</label><input type="number" id="gpHigh"></div>
+            <div class="input-group"><label>If % ≥ Mid</label><input type="number" id="condMedUpper"></div>
+            <div class="input-group"><label>If % < Mid </label><input type="number" id="condMedLower"></div>
+            <div class="input-group"><label>GP Medium</label><input type="number" id="gpMed"></div>
+            <div class="input-group"><label>If % < Low </label><input type="number" id="condLow"></div>
+            <div class="input-group"><label>GP Low </label><input type="number" id="gpLow"></div>
+        </div>
+        <button onclick="generateSetup()">Setup COs</button>
+        <div id="subjectDisplay"></div>
+        <div id="maxMarksSection"></div>
+        <div id="coFilterSection"></div>
+        <div id="tableSection"></div>
+        <div id="poInputSection"></div>
+        <div id="mappingSection"></div>
+        <div id="poResultSection"></div>
+    </div>
+    <div style="text-align:right; margin-bottom:10px;">
+        <a href="/student-performance">
+            <button>Go to Student Performance →</button>
+        </a>
+    </div>
+    <script>
+        let numCO, numStudents, numPO;
+        function generateSetup() {
+            numCO = parseInt(document.getElementById("numCO").value);
+            let subName = document.getElementById("subjectName").value;
+            if (isNaN(numCO)) { alert("Please enter the number of COs"); return; }
+            document.getElementById("subjectDisplay").innerHTML = `<div class="subject-title">Subject: ${subName}</div>`;
+            let html = "<h3>Enter CO Topics and Max Marks</h3><div class='grid'>";
+            for (let i = 1; i <= numCO; i++) {
+                html += `
+        <div style="border:1px solid #ddd; padding:10px; border-radius:5px;">
+            <label>CO${i} Topic</label>
+            <input type="text" id="topic${i}">
+            <label>CO${i} Max Marks</label>
+            <input type="number" id="max${i}">
+        </div>`;
+            }
+            html += "</div><button onclick='generateTable()'>Generate Student Table</button>";
+            document.getElementById("maxMarksSection").innerHTML = html;
+        }
+        function generateTable() {
+            numStudents = parseInt(document.getElementById("numStudents").value);
+            if (isNaN(numStudents)) { alert("Please enter the number of students"); return; }
+            generateCOFilter();
+            let table = "<h3>Student Marks Entry</h3><table><tr><th>Student Name</th>";
+            for (let i = 1; i <= numCO; i++) {
+                let topic = document.getElementById("topic" + i).value;
+                table += `
+        <th class="co${i}">CO${i} Topic<br>(${topic})</th>
+        <th class="co${i}">Max</th>
+        <th class="co${i}">Marks</th>
+        <th class="co${i}">%</th>
+        <th class="co${i}">GP</th>`;
+            }
+            table += "</tr>";
+            for (let s = 1; s <= numStudents; s++) {
+                table += `<tr><td><input type='text'></td>`;
+                for (let i = 1; i <= numCO; i++) {
+                    table += `
+            <td class="co${i}">${document.getElementById("topic" + i).value}</td>
+            <td class="co${i}">${document.getElementById("max" + i).value}</td>
+            <td class="co${i}"><input type="number" oninput="calculate(${s},${i})" id="marks${s}_${i}"></td>
+            <td class="co${i}" id="percent${s}_${i}">-</td>
+            <td class="co${i}" id="gp${s}_${i}">-</td>`;
+                }
+                table += "</tr>";
+            }
+            table += "<tr style='font-weight:bold; background:#e6f0ff;'><td>CO Average GP</td>";
+            for (let i = 1; i <= numCO; i++) {
+                table += `<td colspan="4" class="co${i}">Average:</td><td class="co${i}" id="avgGP${i}">0.00</td>`;
+            }
+            table += "</tr></table>";
+            document.getElementById("tableSection").innerHTML = table;
+            generatePOInput();
+        }
+        function calculate(student, co) {
+            let max = parseFloat(document.getElementById("max" + co).value);
+            let marks = parseFloat(document.getElementById(`marks${student}_${co}`).value);
+            if (isNaN(marks)) marks = 0;
+            if (isNaN(max) || max <= 0) return;
+            let percent = (marks / max) * 100;
+            document.getElementById(`percent${student}_${co}`).innerText = percent.toFixed(2);
+            let cHigh = parseFloat(document.getElementById("condHigh").value);
+            let cMedU = parseFloat(document.getElementById("condMedUpper").value);
+            let cMedL = parseFloat(document.getElementById("condMedLower").value);
+            let cLow = parseFloat(document.getElementById("condLow").value);
+            let gHigh = parseFloat(document.getElementById("gpHigh").value);
+            let gMed = parseFloat(document.getElementById("gpMed").value);
+            let gLow = parseFloat(document.getElementById("gpLow").value);
+            let gp = 0;
+            if (percent >= cHigh) {
+                gp = gHigh;
+            } else if (percent >= cMedU && percent >= cMedL) {
+                gp = gMed;
+            } else if (percent >= cLow) {
+                gp = gLow;
+            } else {
+                gp = 0;
+            }
+            document.getElementById(`gp${student}_${co}`).innerText = isNaN(gp) ? 0 : gp;
+            calculateAverage(co);
+        }
+        function calculateAverage(co) {
+            let total = 0, count = 0;
+            for (let s = 1; s <= numStudents; s++) {
+                let gCell = document.getElementById(`gp${s}_${co}`);
+                if (gCell && gCell.innerText !== "-") {
+                    let g = parseFloat(gCell.innerText);
+                    if (!isNaN(g)) {
+                        total += g;
+                        count++;
+                    }
+                }
+            }
+            if (count > 0) {
+                document.getElementById(`avgGP${co}`).innerText = (total / count).toFixed(2);
+            }
+        }
+        function generateCOFilter() {
+            let html = "<h3>Filter View by CO</h3><div class='filter-box'>";
+            for (let i = 1; i <= numCO; i++) {
+                html += `<label><input type="checkbox" checked onchange="applyCOFilter()" value="${i}"> CO${i}</label>`;
+            }
+            html += "</div>";
+            document.getElementById("coFilterSection").innerHTML = html;
+        }
+        function applyCOFilter() {
+            for (let i = 1; i <= numCO; i++) {
+                let checkbox = document.querySelector(`input[value="${i}"]`);
+                let checked = checkbox.checked;
+                document.querySelectorAll(".co" + i).forEach(cell => {
+                    cell.style.display = checked ? "" : "none";
+                });
+            }
+        }
+        function generatePOInput() {
+            let html = `<h3>PO Configuration</h3>
+    <div class="grid" style="max-width:400px">
+        <div class="input-group">
+            <label>Number of POs</label>
+            <input type="number" id="numPO_val">
+        </div>
+    </div>
+    <button onclick="generateMapping()">Generate CO-PO Mapping Matrix</button>`;
+            document.getElementById("poInputSection").innerHTML = html;
+        }
+        function generateMapping() {
+            numPO = parseInt(document.getElementById("numPO_val").value);
+            if (isNaN(numPO)) { alert("Please enter the number of POs"); return; }
+            let map = "<h3>CO-PO Mapping (Scale: 0-3)</h3><table><tr><th>CO \\ PO</th>";
+            for (let j = 1; j <= numPO; j++) {
+                map += `<th>PO${j}</th>`;
+            }
+            map += "</tr>";
+            for (let i = 1; i <= numCO; i++) {
+                map += `<tr><th>CO${i}</th>`;
+                for (let j = 1; j <= numPO; j++) {
+                    map += `<td><input type="number" min="0" max="3" id="map${i}_${j}"></td>`;
+                }
+                map += "</tr>";
+            }
+            map += "</table><button onclick='calculatePO()'>Calculate Final Attainment</button>";
+            document.getElementById("mappingSection").innerHTML = map;
+        }
+        function calculatePO() {
+            let result = "<h3>Final PO Attainment Results</h3><table><tr><th>Program Outcome</th><th>Attainment Level</th></tr>";
+            for (let j = 1; j <= numPO; j++) {
+                let totalWeightProduct = 0, totalWeight = 0;
+                for (let i = 1; i <= numCO; i++) {
+                    let avgGP = parseFloat(document.getElementById(`avgGP${i}`).innerText) || 0;
+                    let mapVal = parseFloat(document.getElementById(`map${i}_${j}`).value) || 0;
+                    totalWeightProduct += (avgGP * mapVal);
+                    totalWeight += mapVal;
+                }
+                let attainment = totalWeight > 0 ? (totalWeightProduct / totalWeight).toFixed(2) : "0.00";
+                result += `<tr><td><strong>PO${j}</strong></td><td style="background:#e6f0ff; font-weight:bold;">${attainment}</td></tr>`;
+            }
+            result += "</table>";
+            document.getElementById("poResultSection").innerHTML = result;
+            window.scrollTo(0, document.body.scrollHeight);
+        }
+    </script>
+</body>
+
+</html>

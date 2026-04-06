@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Student Performance</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link id="mainStylesheet" rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        (function () {
+            const stylesheet = document.getElementById("mainStylesheet");
+            const href = stylesheet.getAttribute("href") || "";
+
+            // If opened directly, Jinja placeholders are not rendered.
+            if (href.includes("{{") || href.includes("}}")) {
+                stylesheet.setAttribute("href", "../static/style.css");
+            }
+        })();
+    </script>
+    <style>
+        /* page-specific */
+        table { display: block; overflow-x: auto; }
+        .gray { background: #dee2e6; }
+        .info-section p { margin: 4px 0; }
+        th input { background: transparent; border: 1px solid rgba(255,255,255,0.4); color: white; width: 70px; }
+    </style>
+
+</head>
+
+<body>
+    <div class="container">
+        <div class="info-section">
+            <h2>Student Performance</h2>
+            <p><b>CAY</b> – Current Academic Year</p>
+            <p><b>CAYm1</b> – Current Academic Year minus 1</p>
+            <p><b>CAYm2</b> – Current Academic Year minus 2</p>
+            <p><b>LYG</b> – Last Year Graduate</p>
+            <p><b>LYGm1</b> – Last Year Graduate minus 1</p>
+            <p><b>LYGm2</b> – Last Year Graduate minus 2</p>
+        </div>
+        <h3>Table Student Admission Details</h3>
+        <table>
+            <tr>
+                <th>Item</th>
+                <th>CAY(<input type="text"></th>
+                <th>CAYm1(<input type="text"></th>
+                <th>CAYm2(<input type="text"></th>
+            </tr>
+            <tr>
+                <td>Sanctioned intake of the program (N)</td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+            </tr>
+            <tr>
+                <td>Total number of students admitted in first year (N1)</td>
+                <td><input type="number" id="n1cay"></td>
+                <td><input type="number" id="n1m1"></td>
+                <td><input type="number" id="n1m2"></td>
+            </tr>
+            <tr>
+                <td>Lateral Entry Students (N2)</td>
+                <td><input type="number" id="n2cay"></td>
+                <td><input type="number" id="n2m1"></td>
+                <td><input type="number" id="n2m2"></td>
+            </tr>
+            <tr>
+                <td>Separate division students (N3)</td>
+                <td><input type="number" id="n3cay"></td>
+                <td><input type="number" id="n3m1"></td>
+                <td><input type="number" id="n3m2"></td>
+            </tr>
+            <tr class="total">
+                <td>Total (N1+N2+N3)</td>
+                <td id="totalcay">0</td>
+                <td id="totalm1">0</td>
+                <td id="totalm2">0</td>
+            </tr>
+        </table>
+        <center>
+            <button onclick="calculateTotal()">Calculate Total</button>
+        </center>
+        <h3>Students Graduated WITHOUT Backlogs</h3>
+        <table>
+            <tr>
+                <th rowspan="2">Year of Entry</th>
+                <th rowspan="2">N1+N2+N3</th>
+                <th colspan="4">Students Graduated Without Backlogs</th>
+            </tr>
+            <tr>
+                <th>I Year</th>
+                <th>II Year</th>
+                <th>III Year</th>
+                <th>IV Year</th>
+            </tr>
+            <tr>
+                <td>CAY(<input type="text"></td>
+                <td><input type="number"></td>
+                <td class="gray"></td>
+                <td class="gray"></td>
+                <td class="gray"></td>
+                <td class="gray"></td>
+            </tr>
+            <tr>
+                <td>CAYm1(<input type="text"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+                <td class="gray"></td>
+                <td class="gray"></td>
+                <td class="gray"></td>
+            </tr>
+            <tr>
+                <td>CAYm2(<input type="text"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+                <td class="gray"></td>
+                <td class="gray"></td>
+            </tr>
+            <tr>
+                <td>CAYm3(<input type="text"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+                <td class="gray"></td>
+            </tr>
+            <tr>
+                <td>CAYm4 (LYG)(<input type="text"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+            </tr>
+            <tr>
+                <td>CAYm5 (LYGm1)(<input type="text"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+            </tr>
+            <tr>
+                <td>CAYm6 (LYGm2)(<input type="text"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+            </tr>
+        </table>
+        <h3>Students Graduated WITH Backlogs</h3>
+        <table>
+            <tr>
+                <th rowspan="2">Year of Entry</th>
+                <th rowspan="2">N1+N2+N3</th>
+                <th colspan="4">Students Graduated With Backlogs</th>
+            </tr>
+            <tr>
+                <th>I Year</th>
+                <th>II Year</th>
+                <th>III Year</th>
+                <th>IV Year</th>
+            </tr>
+            <tr>
+                <td>CAY (<input type="text"></td>
+                <td><input type="number"></td>
+                <td class="gray"></td>
+                <td class="gray"></td>
+                <td class="gray"></td>
+                <td class="gray"></td>
+            </tr>
+            <tr>
+                <td>CAYm1 (<input type="text"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+                <td class="gray"></td>
+                <td class="gray"></td>
+                <td class="gray"></td>
+            </tr>
+            <tr>
+                <td>CAYm2 (<input type="text"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+                <td class="gray"></td>
+                <td class="gray"></td>
+            </tr>
+            <tr>
+                <td>CAYm3 (<input type="text"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+                <td class="gray"></td>
+            </tr>
+            <tr>
+                <td>CAYm4 (LYG) (<input type="text"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+            </tr>
+            <tr>
+                <td>CAYm5 (LYGm1) (<input type="text"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+            </tr>
+            <tr>
+                <td>CAYm6 (LYGm2) (<input type="text"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+            </tr>
+        </table>
+        <h3>Marks Table</h3>
+        <table>
+            <tr>
+                <th>Students Enrolled (%)</th>
+                <th>Marks</th>
+            </tr>
+            <tr>
+                <td>>= 90%</td>
+                <td>20</td>
+            </tr>
+            <tr>
+                <td>>= 80%</td>
+                <td>18</td>
+            </tr>
+            <tr>
+                <td>>= 70%</td>
+                <td>16</td>
+            </tr>
+            <tr>
+                <td>>= 60%</td>
+                <td>14</td>
+            </tr>
+            <tr>
+                <td>>= 50%</td>
+                <td>12</td>
+            </tr>
+            <tr>
+                <td>Otherwise</td>
+                <td>0</td>
+            </tr>
+        </table>
+        <h2>Enrollment Ratio Calculator</h2>
+        <label>N1 (Students Enrolled): </label>
+        <input type="number" id="n1"><br><br>
+        <label>N (Total Students): </label>
+        <input type="number" id="n"><br><br>
+        <button onclick="calculateEnrollment()">Calculate</button>
+        <h3 id="ratio"></h3>
+        <h3 id="percent"></h3>
+        <h3 id="marks"></h3>
+        <h2>Success Rate without Backlogs in any Semester/ Year of Study</h2>
+        <table>
+            <tr>
+                <th>Item</th>
+                <th>LYG</th>
+                <th>LYGm1</th>
+                <th>LYGm2</th>
+            </tr>
+            <tr>
+                <td>Students admitted</td>
+                <td><input type="number" id="ad1"></td>
+                <td><input type="number" id="ad2"></td>
+                <td><input type="number" id="ad3"></td>
+            </tr>
+            <tr>
+                <td>Students graduated without backlog</td>
+                <td><input type="number" id="gr1"></td>
+                <td><input type="number" id="gr2"></td>
+                <td><input type="number" id="gr3"></td>
+            </tr>
+            <tr>
+                <td>Success Index (SI)</td>
+                <td id="si1"></td>
+                <td id="si2"></td>
+                <td id="si3"></td>
+            </tr>
+            <tr>
+                <td><b>Average SI</b></td>
+                <td colspan="3" id="avgSI"></td>
+            </tr>
+        </table>
+        <button onclick="calculateSI()">Calculate</button>
+        <h3 id="successRate"></h3>
+        <h2>Success Rate Calculator</h2>
+        <table>
+            <tr>
+                <th>Item</th>
+                <th>LYG</th>
+                <th>LYGm1</th>
+                <th>LYGm2</th>
+            </tr>
+            <tr>
+                <td>Students Admitted</td>
+                <td><input type="number" id="a1"></td>
+                <td><input type="number" id="a2"></td>
+                <td><input type="number" id="a3"></td>
+            </tr>
+            <tr>
+                <td>Graduated Without Backlogs</td>
+                <td><input type="number" id="g1"></td>
+                <td><input type="number" id="g2"></td>
+                <td><input type="number" id="g3"></td>
+            </tr>
+            <tr>
+                <td>Success Index (SI)</td>
+                <td id="siA">0</td>
+                <td id="siB">0</td>
+                <td id="siC">0</td>
+            </tr>
+            <tr>
+                <td>Average SI</td>
+                <td colspan="3" id="avg">0</td>
+            </tr>
+            <tr>
+                <td>Success Rate</td>
+                <td colspan="3" id="rate">0</td>
+            </tr>
+        </table>
+        <button onclick="calculateSuccess()">Calculate</button>
+    </div>
+    <h2>Academic Performance in Third Year</h2>
+    <table>
+        <tr>
+            <th>Academic Performance</th>
+            <th>CAYm1</th>
+            <th>CAYm2</th>
+            <th>CAYm3</th>
+        </tr>
+        <tr>
+            <td>Mean CGPA / Percentage (X)</td>
+            <td><input id="tx1"></td>
+            <td><input id="tx2"></td>
+            <td><input id="tx3"></td>
+        </tr>
+        <tr>
+            <td>Successful Students (Y)</td>
+            <td><input id="ty1"></td>
+            <td><input id="ty2"></td>
+            <td><input id="ty3"></td>
+        </tr>
+        <tr>
+            <td>Students Appeared (Z)</td>
+            <td><input id="tz1"></td>
+            <td><input id="tz2"></td>
+            <td><input id="tz3"></td>
+        </tr>
+        <tr>
+            <td>API = X &times; (Y/Z)</td>
+            <td id="tap1">0</td>
+            <td id="tap2">0</td>
+            <td id="tap3">0</td>
+        </tr>
+        <tr>
+            <td>Average API</td>
+            <td colspan="3" id="tavgapi">0</td>
+        </tr>
+    </table>
+    <h2>Academic Performance in Second Year</h2>
+    <table>
+        <tr>
+            <th>Academic Performance</th>
+            <th>CAYm1</th>
+            <th>CAYm2</th>
+            <th>CAYm3</th>
+        </tr>
+        <tr>
+            <td>Mean CGPA / Mean Percentage (X)</td>
+            <td><input id="sx1"></td>
+            <td><input id="sx2"></td>
+            <td><input id="sx3"></td>
+        </tr>
+        <tr>
+            <td>Total No. of Successful Students (Y)</td>
+            <td><input id="sy1"></td>
+            <td><input id="sy2"></td>
+            <td><input id="sy3"></td>
+        </tr>
+        <tr>
+            <td>Total No. of Students Appeared (Z)</td>
+            <td><input id="sz1"></td>
+            <td><input id="sz2"></td>
+            <td><input id="sz3"></td>
+        </tr>
+        <tr>
+            <td>API = X &times; (Y/Z)</td>
+            <td id="sap1">0</td>
+            <td id="sap2">0</td>
+            <td id="sap3">0</td>
+        </tr>
+        <tr>
+            <td>Average API</td>
+            <td colspan="3" id="savgapi">0</td>
+        </tr>
+    </table>
+    <button onclick="calculateAPI()">Calculate API</button>
+    <h2>Placement / Higher Studies</h2>
+    <table>
+        <tr>
+            <th>Item</th>
+            <th>CAYm1</th>
+            <th>CAYm2</th>
+            <th>CAYm3</th>
+        </tr>
+        <tr>
+            <td>Total Final Year Students (N)</td>
+            <td><input id="n1"></td>
+            <td><input id="n2"></td>
+            <td><input id="n3"></td>
+        </tr>
+        <tr>
+            <td>Students Placed (x)</td>
+            <td><input id="px1"></td>
+            <td><input id="px2"></td>
+            <td><input id="px3"></td>
+        </tr>
+        <tr>
+            <td>Higher Studies (y)</td>
+            <td><input id="py1"></td>
+            <td><input id="py2"></td>
+            <td><input id="py3"></td>
+        </tr>
+        <tr>
+            <td>Entrepreneurs (z)</td>
+            <td><input id="pz1"></td>
+            <td><input id="pz2"></td>
+            <td><input id="pz3"></td>
+        </tr>
+        <tr>
+            <td>x + y + z</td>
+            <td id="sum1">0</td>
+            <td id="sum2">0</td>
+            <td id="sum3">0</td>
+        </tr>
+        <tr>
+            <td>Placement Index = (x+y+z)/N</td>
+            <td id="p1">0</td>
+            <td id="p2">0</td>
+            <td id="p3">0</td>
+        </tr>
+        <tr>
+            <td>Average Placement</td>
+            <td colspan="3" id="avgplace">0</td>
+        </tr>
+    </table>
+    <button onclick="calculatePlacement()">Calculate Placement</button>
+    <div style="text-align:right;">
+        <a href="/">
+            <button>← Back to CO-PO</button>
+        </a>
+    </div>
+    <div style="text-align:right; margin-bottom:10px;">
+        <a href="/faculty">
+            <button>Faculty Info →</button>
+        </a>
+    </div>
+
+    <script>
+        function val(id) {
+            return parseFloat(document.getElementById(id).value) || 0;
+        }
+        function safe(a, b) {
+            if (b == 0) return 0;
+            return a / b;
+        }
+        function calculateTotal() {
+            let n1cay = val("n1cay");
+            let n2cay = val("n2cay");
+            let n3cay = val("n3cay");
+            let n1m1 = val("n1m1");
+            let n2m1 = val("n2m1");
+            let n3m1 = val("n3m1");
+            let n1m2 = val("n1m2");
+            let n2m2 = val("n2m2");
+            let n3m2 = val("n3m2");
+            document.getElementById("totalcay").innerText = n1cay + n2cay + n3cay;
+            document.getElementById("totalm1").innerText = n1m1 + n2m1 + n3m1;
+            document.getElementById("totalm2").innerText = n1m2 + n2m2 + n3m2;
+        }
+        function calculateEnrollment() {
+            let n1 = val("n1");
+            let n = val("n");
+            let ratio = safe(n1, n);
+            let percent = ratio * 100;
+            let marks = 0;
+            if (percent >= 90) { marks = 20; }
+            else if (percent >= 80) { marks = 18; }
+            else if (percent >= 70) { marks = 16; }
+            else if (percent >= 60) { marks = 14; }
+            else if (percent >= 50) { marks = 12; }
+            else { marks = 0; }
+            document.getElementById("ratio").innerHTML = "Enrollment Ratio = " + ratio.toFixed(2);
+            document.getElementById("percent").innerHTML = "Percentage = " + percent.toFixed(2) + "%";
+            document.getElementById("marks").innerHTML = "Marks = " + marks;
+        }
+        function calculateSI() {
+            let ad1 = val("ad1");
+            let ad2 = val("ad2");
+            let ad3 = val("ad3");
+            let gr1 = val("gr1");
+            let gr2 = val("gr2");
+            let gr3 = val("gr3");
+            let si1 = safe(gr1, ad1);
+            let si2 = safe(gr2, ad2);
+            let si3 = safe(gr3, ad3);
+            document.getElementById("si1").innerHTML = si1.toFixed(3);
+            document.getElementById("si2").innerHTML = si2.toFixed(3);
+            document.getElementById("si3").innerHTML = si3.toFixed(3);
+            let avgSI = (si1 + si2 + si3) / 3;
+            document.getElementById("avgSI").innerHTML = avgSI.toFixed(3);
+            let successRate = 25 * avgSI;
+            document.getElementById("successRate").innerHTML = "Success Rate without backlog = " + successRate.toFixed(3);
+        }
+        function calculateSuccess() {
+            let a1 = val("a1");
+            let a2 = val("a2");
+            let a3 = val("a3");
+            let g1 = val("g1");
+            let g2 = val("g2");
+            let g3 = val("g3");
+            let si1 = safe(g1, a1);
+            let si2 = safe(g2, a2);
+            let si3 = safe(g3, a3);
+            document.getElementById("siA").innerHTML = si1.toFixed(3);
+            document.getElementById("siB").innerHTML = si2.toFixed(3);
+            document.getElementById("siC").innerHTML = si3.toFixed(3);
+            let avg = (si1 + si2 + si3) / 3;
+            document.getElementById("avg").innerHTML = avg.toFixed(3);
+            let rate = 15 * avg;
+            document.getElementById("rate").innerHTML = rate.toFixed(3);
+        }
+
+        // FIXED: Added missing { after function name
+        function calculateAPI() {
+            let tx1 = val("tx1"), tx2 = val("tx2"), tx3 = val("tx3");
+            let ty1 = val("ty1"), ty2 = val("ty2"), ty3 = val("ty3");
+            let tz1 = val("tz1"), tz2 = val("tz2"), tz3 = val("tz3");
+            let tap1 = tx1 * safe(ty1, tz1);
+            let tap2 = tx2 * safe(ty2, tz2);
+            let tap3 = tx3 * safe(ty3, tz3);
+            document.getElementById("tap1").innerHTML = tap1.toFixed(3);
+            document.getElementById("tap2").innerHTML = tap2.toFixed(3);
+            document.getElementById("tap3").innerHTML = tap3.toFixed(3);
+            let tavg = (tap1 + tap2 + tap3) / 3;
+            document.getElementById("tavgapi").innerHTML = tavg.toFixed(3);
+            let sx1 = val("sx1"), sx2 = val("sx2"), sx3 = val("sx3");
+            let sy1 = val("sy1"), sy2 = val("sy2"), sy3 = val("sy3");
+            let sz1 = val("sz1"), sz2 = val("sz2"), sz3 = val("sz3");
+            let sap1 = sx1 * safe(sy1, sz1);
+            let sap2 = sx2 * safe(sy2, sz2);
+            let sap3 = sx3 * safe(sy3, sz3);
+            document.getElementById("sap1").innerHTML = sap1.toFixed(3);
+            document.getElementById("sap2").innerHTML = sap2.toFixed(3);
+            document.getElementById("sap3").innerHTML = sap3.toFixed(3);
+            let savg = (sap1 + sap2 + sap3) / 3;
+            document.getElementById("savgapi").innerHTML = savg.toFixed(3);
+        }
+
+        function calculatePlacement() {
+            // Note: Ensure your HTML IDs n1, n2, n3 don't conflict with other sections
+            let n1 = val("n1"), n2 = val("n2"), n3 = val("n3");
+            let px1 = val("px1"), px2 = val("px2"), px3 = val("px3");
+            let py1 = val("py1"), py2 = val("py2"), py3 = val("py3");
+            let pz1 = val("pz1"), pz2 = val("pz2"), pz3 = val("pz3");
+            let s1 = px1 + py1 + pz1;
+            let s2 = px2 + py2 + pz2;
+            let s3 = px3 + py3 + pz3;
+            document.getElementById("sum1").innerHTML = s1;
+            document.getElementById("sum2").innerHTML = s2;
+            document.getElementById("sum3").innerHTML = s3;
+            let p1 = safe(s1, n1);
+            let p2 = safe(s2, n2);
+            let p3 = safe(s3, n3);
+            document.getElementById("p1").innerHTML = p1.toFixed(3);
+            document.getElementById("p2").innerHTML = p2.toFixed(3);
+            document.getElementById("p3").innerHTML = p3.toFixed(3);
+            let avg = (p1 + p2 + p3) / 3;
+            document.getElementById("avgplace").innerHTML = avg.toFixed(3);
+        }
+    </script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+
+</html>
