@@ -5,6 +5,37 @@
     <meta charset="UTF-8">
     <title>NBA Accreditation Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        (function () {
+            const isStaticMode = window.location.protocol === "file:" ||
+                window.location.pathname.endsWith(".html");
+
+            if (!isStaticMode) {
+                return;
+            }
+
+            document.addEventListener("DOMContentLoaded", function () {
+                const routeToFile = {
+                    "/dashboard": "dashboard.html",
+                    "/co-po": "templates/co_po.html",
+                    "/student-performance": "templates/student_performance.html",
+                    "/faculty": "templates/faculty.html",
+                    "/str": "templates/str.html",
+                    "/str-table": "templates/str_table.html",
+                    "/development": "templates/development.html",
+                    "/login": "templates/login.html",
+                    "/logout": "templates/login.html"
+                };
+
+                document.querySelectorAll("a[href]").forEach(function (link) {
+                    const target = link.getAttribute("href");
+                    if (routeToFile[target]) {
+                        link.setAttribute("href", routeToFile[target]);
+                    }
+                });
+            });
+        })();
+    </script>
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;

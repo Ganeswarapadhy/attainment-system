@@ -3,7 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <title>NBA - STR Calculation Table</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link id="mainStylesheet" rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        (function () {
+            const stylesheet = document.getElementById("mainStylesheet");
+            const href = stylesheet.getAttribute("href") || "";
+
+            if (href.includes("{{") || href.includes("}}")) {
+                stylesheet.setAttribute("href", "../static/style.css");
+            }
+
+            const isStaticMode = window.location.protocol === "file:" ||
+                window.location.pathname.endsWith(".html") ||
+                window.location.pathname.includes("/templates/");
+
+            if (!isStaticMode) {
+                return;
+            }
+
+            document.addEventListener("DOMContentLoaded", function () {
+                const routeToFile = {
+                    "/": "co_po.html",
+                    "/dashboard": "dashboard.html",
+                    "/co-po": "co_po.html",
+                    "/student-performance": "student_performance.html",
+                    "/faculty": "faculty.html",
+                    "/str": "str.html",
+                    "/str-table": "str_table.html",
+                    "/development": "development.html",
+                    "/login": "login.html",
+                    "/logout": "login.html"
+                };
+
+                document.querySelectorAll("a[href]").forEach(function (link) {
+                    const target = link.getAttribute("href");
+                    if (routeToFile[target]) {
+                        link.setAttribute("href", routeToFile[target]);
+                    }
+                });
+            });
+        })();
+    </script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; padding: 30px; }
         .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
