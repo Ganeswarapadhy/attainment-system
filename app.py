@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 import json
 import os
@@ -54,7 +55,7 @@ def login_required(f):
 def login():
     if request.method == "POST":
         username = request.form.get("email") or request.form.get("username", "")
-        password = request.form.get("password", "")
+        password = generate_password_hash(request.form["password"])
         if username == "admin" and password == "admin123":
             session['logged_in'] = True
             session['username'] = username
