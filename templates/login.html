@@ -1153,6 +1153,12 @@
     <script>
         let selectedRole = 'admin', currentMode = 'signin';
 
+        function getDashboardRedirectUrl() {
+            const path = window.location.pathname.toLowerCase();
+            const isStaticMode = window.location.protocol === 'file:' || path.endsWith('.html') || path.includes('/templates/');
+            return isStaticMode ? 'dashboard.html' : '/dashboard';
+        }
+
         // ── MODE SWITCH ──
         function switchMode(mode) {
             currentMode = mode;
@@ -1209,8 +1215,13 @@
             if (!email || email.length < 3) { showErr('loginEmail', 'loginEmailErr'); ok = false }
             if (!pw || pw.length < 6) { showErr('loginPass', 'loginPassErr'); ok = false }
             if (!ok) return;
+            const redirectUrl = getDashboardRedirectUrl();
             const btn = document.getElementById('signinBtn'); btn.classList.add('loading'); btn.disabled = true;
-            setTimeout(() => { btn.classList.remove('loading'); btn.disabled = false; showToast(`Welcome back, ${selectedRole === 'admin' ? 'Administrator' : 'Faculty Member'}! Redirecting…`); setTimeout(() => document.getElementById('loginForm').reset(), 2500) }, 1800);
+            setTimeout(() => {
+                btn.classList.remove('loading'); btn.disabled = false;
+                showToast(`Welcome back, ${selectedRole === 'admin' ? 'Administrator' : 'Faculty Member'}! Redirecting...`);
+                setTimeout(() => { window.location.href = redirectUrl }, 1000);
+            }, 1800);
         }
 
         // ── SIGN UP ──
@@ -1226,8 +1237,13 @@
             if (pw !== confirm) { showErr('signupConfirm', 'signupConfirmErr'); ok = false }
             if (!terms) { document.getElementById('termsErr').classList.add('visible'); ok = false }
             if (!ok) return;
+            const redirectUrl = getDashboardRedirectUrl();
             const btn = document.getElementById('signupBtn'); btn.classList.add('loading'); btn.disabled = true;
-            setTimeout(() => { btn.classList.remove('loading'); btn.disabled = false; showToast(`Account created successfully! Welcome, ${selectedRole === 'admin' ? 'Administrator' : 'Faculty Member'}!`); setTimeout(() => { document.getElementById('signupForm').reset(); document.getElementById('strengthFill').style.width = '0'; document.getElementById('strengthText').textContent = ''; switchMode('signin') }, 2500) }, 1800);
+            setTimeout(() => {
+                btn.classList.remove('loading'); btn.disabled = false;
+                showToast(`Account created successfully! Welcome, ${selectedRole === 'admin' ? 'Administrator' : 'Faculty Member'}! Redirecting...`);
+                setTimeout(() => { window.location.href = redirectUrl }, 1000);
+            }, 1800);
         }
 
         // ── HELPERS ──
